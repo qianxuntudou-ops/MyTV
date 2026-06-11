@@ -15,7 +15,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -51,16 +53,25 @@ class PlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.i(TAG, "onViewCreated")
         setupPlayer()
         (activity as MainActivity).ready(TAG)
     }
 
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun setupPlayer() {
         val context = requireContext()
+        val renderersFactory = DefaultRenderersFactory(context)
+            .forceDisableMediaCodecAsynchronousQueueing()
+            .setEnableDecoderFallback(true)
         val mediaSourceFactory = DefaultMediaSourceFactory(
             OkHttpDataSource.Factory(HttpClient.okHttpClient)
         )
-        player = ExoPlayer.Builder(context)
+        Log.i(
+            TAG,
+            "setupPlayer codecMode=synchronous decoderFallback=true quality=${currentQuality.key}"
+        )
+        player = ExoPlayer.Builder(context, renderersFactory)
             .setMediaSourceFactory(mediaSourceFactory)
             .build()
             .also { exoPlayer ->
@@ -68,11 +79,41 @@ class PlayerFragment : Fragment() {
                 exoPlayer.playWhenReady = true
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(playbackState: Int) {
+                        Log.i(
+                            TAG,
+                            "onPlaybackStateChanged state=${stateName(playbackState)} " +
+                                "playWhenReady=${exoPlayer.playWhenReady} " +
+                                "isPlaying=${exoPlayer.isPlaying}"
+                        )
                         if (playbackState == Player.STATE_READY) {
                             tvModel?.setErrInfo("")
                             tvModel?.retryTimes = 0
                             Log.i(TAG, "ready ${tvModel?.tv?.title}")
                         }
+                    }
+
+                    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                        Log.i(
+                            TAG,
+                            "onPlayWhenReadyChanged playWhenReady=$playWhenReady " +
+                                "reason=${playWhenReadyReasonName(reason)}"
+                        )
+                    }
+
+                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                        Log.i(TAG, "onIsPlayingChanged isPlaying=$isPlaying")
+                    }
+
+                    override fun onPlaybackSuppressionReasonChanged(playbackSuppressionReason: Int) {
+                        Log.i(
+                            TAG,
+                            "onPlaybackSuppressionReasonChanged reason=" +
+                                suppressionReasonName(playbackSuppressionReason)
+                        )
+                    }
+
+                    override fun onRenderedFirstFrame() {
+                        Log.i(TAG, "onRenderedFirstFrame ${tvModel?.tv?.title}")
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
@@ -94,6 +135,7 @@ class PlayerFragment : Fragment() {
     }
 
     private fun releasePlayer() {
+        Log.i(TAG, "releasePlayer")
         playJob?.cancel()
         playJob = null
         currentResult = null
@@ -104,6 +146,7 @@ class PlayerFragment : Fragment() {
     }
 
     private fun playResolved(model: TVModel) {
+        Log.i(TAG, "playResolved ${model.tv.title} quality=${currentQuality.key}")
         playJob?.cancel()
         playJob = viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -125,6 +168,7 @@ class PlayerFragment : Fragment() {
     }
 
     fun play(model: TVModel) {
+        Log.i(TAG, "play request ${model.tv.title}")
         tvModel = model
         playResolved(model)
     }
@@ -221,15 +265,28 @@ class PlayerFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.i(TAG, "onResume")
         player?.playWhenReady = true
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.i(TAG, "onStart")
+    }
+
     override fun onPause() {
+        Log.i(TAG, "onPause")
         player?.playWhenReady = false
         super.onPause()
     }
 
+    override fun onStop() {
+        Log.i(TAG, "onStop")
+        super.onStop()
+    }
+
     override fun onDestroyView() {
+        Log.i(TAG, "onDestroyView")
         handler.removeCallbacksAndMessages(null)
         releasePlayer()
         _binding = null
@@ -238,5 +295,34 @@ class PlayerFragment : Fragment() {
 
     companion object {
         private const val TAG = "PlayerFragment"
+
+        private fun stateName(state: Int): String {
+            return when (state) {
+                Player.STATE_IDLE -> "IDLE"
+                Player.STATE_BUFFERING -> "BUFFERING"
+                Player.STATE_READY -> "READY"
+                Player.STATE_ENDED -> "ENDED"
+                else -> state.toString()
+            }
+        }
+
+        private fun playWhenReadyReasonName(reason: Int): String {
+            return when (reason) {
+                Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST -> "USER_REQUEST"
+                Player.PLAY_WHEN_READY_CHANGE_REASON_AUDIO_FOCUS_LOSS -> "AUDIO_FOCUS_LOSS"
+                Player.PLAY_WHEN_READY_CHANGE_REASON_AUDIO_BECOMING_NOISY -> "AUDIO_BECOMING_NOISY"
+                Player.PLAY_WHEN_READY_CHANGE_REASON_REMOTE -> "REMOTE"
+                Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> "END_OF_MEDIA_ITEM"
+                else -> reason.toString()
+            }
+        }
+
+        private fun suppressionReasonName(reason: Int): String {
+            return when (reason) {
+                Player.PLAYBACK_SUPPRESSION_REASON_NONE -> "NONE"
+                Player.PLAYBACK_SUPPRESSION_REASON_TRANSIENT_AUDIO_FOCUS_LOSS -> "TRANSIENT_AUDIO_FOCUS_LOSS"
+                else -> reason.toString()
+            }
+        }
     }
 }

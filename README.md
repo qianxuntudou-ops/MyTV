@@ -1,103 +1,116 @@
-# 我的電視·〇
+# MyTV
 
-電視視頻播放軟件，可以自定義視頻源
+一个面向 Android TV 的央视直播播放器。
 
-[my-tv-0](https://github.com/lizongying/my-tv-0)
+这版工程只保留内置央视官方直播频道，默认走原生播放链路，不再提供自定义视频源、远程配置页和通用 IPTV 兼容能力。
 
-## 使用
+## 当前定位
 
-* 遙控器中鍵/觸屏單擊打開視頻列表
-* 遙控器右鍵/觸屏雙擊打開配置
-* 遙控器左鍵/觸屏長按打開節目單
-* 遙控器返回鍵關閉視頻列表/配置
-* 在聚焦視頻標題的時候，右鍵收藏/取消收藏
-* 打開配置后，選擇遠程配置，掃描二維碼可以配置視頻源等。也可以直接遠程配置地址 http://0.0.0.0:34567
-* 如果視頻源地址已配置，並且打開了“應用啟動后更新視頻源”后，應用啟動后會自動更新視頻源
-* 默認遙控器下鍵/觸屏下滑切換到下一個視頻。換台反轉打開後，邏輯相反
+- 只播放内置 CCTV 频道
+- 使用 Media3 ExoPlayer 播放 HLS 直播流
+- 遥控器操作优先，兼容触屏手势
+- 支持频道切换、画质切换、收藏和基础显示设置
+- 最低支持 Android 7.0
 
-注意：
+## 内置频道
 
-* 遇到問題可以先考慮重啟/恢復默認/清除數據/重新安裝等方式自助解決
-* 視頻源可以設置為本地文件，格式如：file:///mnt/sdcard/tmp/channels.m3u
-  /channels.m3u
-* 為了使用方便，只支持設置3位頻道號
-* 目前設置代理後，需要重啟生效。代理屬於全局代理，也就是視頻請求及其他請求都會使用代理。
+当前内置以下频道：
 
-目前支持的配置格式：
+- CCTV-1 综合
+- CCTV-2 财经
+- CCTV-3 综艺
+- CCTV-4 中文国际
+- CCTV-5 体育
+- CCTV-6 电影
+- CCTV-7 国防军事
+- CCTV-8 电视剧
+- CCTV-9 纪录
+- CCTV-10 科教
+- CCTV-11 戏曲
+- CCTV-12 社会与法
+- CCTV-13 新闻
+- CCTV-14 少儿
+- CCTV-15 音乐
+- CCTV-16 奥林匹克
+- CCTV-17 农业农村
 
-* txt
-    ```
-    組名,#genre#
-    標題,視頻地址
-    ```
-* m3u
-    ```
-    #EXTM3U x-tvg-url=""
-    #EXTINF:-1 tvg-id="" tvg-chno="" tvg-name="標準標題" tvg-logo="图标" group-title="組名",標題
-    #EXTVLCOPT:http-user-agent=
-    #EXTVLCOPT:http-referrer=
-    視頻地址
-    ```
-* json
-    ```json
-    [
-      {
-        "group": "組名",
-        "name": "標準標題",
-        "title": "標題",
-        "logo": "图标",
-        "number": "頻道號",
-        "uris": [
-          "視頻地址"
-        ],
-        "headers": {
-          "user-agent": ""
-        }
-      }
-    ]
-    ```
+## 操作方式
 
-推薦配合使用 [my-tv-server](https://github.com/lizongying/my-tv-server)
+### 遥控器
 
-下載安裝 [releases](https://github.com/lizongying/my-tv-0/releases/)
+- `OK / 中键`：打开频道菜单
+- `上 / 下`：切换频道
+- `左 / 右`：切换画质
+- `数字键`：直接输入频道号
+- `菜单 / 设置 / 帮助`：打开设置面板
+- `返回`：关闭菜单或设置；连续按两次退出应用
 
-注意，“*-kitkat”為安卓4.4兼容版本
+### 触屏
 
-更多下載地址 [my-tv-0](https://lyrics.run/my-tv-0.html)
+- `单击`：打开频道菜单
+- `双击`：打开设置面板
+- `中间区域上下滑动`：切换频道
+- `左侧上下滑动`：调节亮度
+- `右侧上下滑动`：调节音量
 
-![image](./screenshots/Screenshot_20240810_151748.png)
-![image](./screenshots/Screenshot_20240813_232847.png)
-![image](./screenshots/Screenshot_20240813_232900.png)
+## 可用设置
 
-## 更新日誌
+当前版本保留的设置项：
 
-[更新日誌](./HISTORY.md)
+- 换台反转
+- 换台时显示频道号
+- 显示时间
+- 时间是否显示秒
+- 开机自启
+- 启动后默认进入我的收藏
+- 显示全部频道
+- 紧凑菜单
+- 恢复默认配置
 
-## 其他
+## 技术栈
 
-建議通過ADB進行安裝：
+- Kotlin
+- Android SDK 35
+- minSdk 24
+- AndroidX Media3 ExoPlayer
+- OkHttp
+- Gson
+- Coroutines
 
-```shell
-adb install my-tv-0.apk
+## 构建
+
+要求：
+
+- JDK 17
+- Android SDK 35
+
+构建调试包：
+
+```bash
+./gradlew assembleDebug
 ```
 
-小米電視可以使用小米電視助手進行安裝
+Windows:
 
-## TODO
+```powershell
+.\gradlew.bat assembleDebug
+```
 
-* 支持回看
-* 淺色菜單
+安装调试包：
 
-## 常見問題
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
 
-* 為什麼遠程配置視頻源文本後，再次打開應用後又恢復到原來的配置？
+## 项目说明
 
-  如果“應用啟動后更新視頻源”開啟後，且存在視頻源地址，則會自動更新，可能會覆蓋已保存的視頻源文本。
+这个仓库基于上游工程思路收敛而来，但目标已经改成单一场景：
 
-## 讚賞
+- 不再维护自定义源导入
+- 不再维护远程网页配置
+- 不再兼容通用直播源格式
+- 只围绕央视直播和电视端播放体验继续迭代
 
-![image](./screenshots/appreciate.png)
+## 更新记录
 
-## 感謝
-
-[live](https://github.com/fanmingming/live)
+[HISTORY.md](./HISTORY.md)

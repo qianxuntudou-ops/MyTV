@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.i(TAG, "onCreate")
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -565,13 +566,30 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.i(TAG, "onResume")
         isSafeToPerformFragmentTransactions = true
         showTimeFragment()
     }
 
     override fun onPause() {
+        Log.i(TAG, "onPause")
         super.onPause()
         isSafeToPerformFragmentTransactions = false
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.i(TAG, "onStart")
+    }
+
+    override fun onStop() {
+        Log.i(TAG, "onStop")
+        super.onStop()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        Log.i(TAG, "onWindowFocusChanged hasFocus=$hasFocus")
     }
 
     override fun attachBaseContext(base: Context) {

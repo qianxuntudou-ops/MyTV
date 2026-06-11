@@ -62,7 +62,11 @@ object CctvLiveResolver {
                 throw IllegalStateException("resolver no playable hls for $slug")
             }
 
-            Log.i(TAG, "resolve $slug quality=${quality.key} primary=${urls.first()} api=$query")
+            Log.i(
+                TAG,
+                "resolve $slug quality=${quality.key} primary=${urls.first()} " +
+                    "backups=${urls.drop(1).size} api=$query"
+            )
             return Result(
                 url = urls.first(),
                 backups = urls.drop(1),
