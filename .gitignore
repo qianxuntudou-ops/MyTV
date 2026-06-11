@@ -28,6 +28,9 @@ app/release/
 *.hprof
 *.log
 logs.txt
+logs-*.txt
+screen-*.png
+mytv-debug-*.log
 Thumbs.db
 Desktop.ini
 *.jks

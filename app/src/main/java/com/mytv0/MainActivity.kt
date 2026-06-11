@@ -46,7 +46,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DebugLog.clear()
         Log.i(TAG, "onCreate")
+        DebugLog.i(TAG, "onCreate")
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -378,23 +380,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun showFragment(fragment: Fragment) {
         if (!isSafeToPerformFragmentTransactions) {
+            Log.w(TAG, "showFragment skipped unsafe ${fragment.logName()}")
             return
         }
 
         if (!fragment.isAdded) {
+            Log.i(TAG, "showFragment add ${fragment.logName()}")
             supportFragmentManager.beginTransaction()
                 .add(R.id.main_browse_fragment, fragment)
-                .commitAllowingStateLoss()
+                .commitNowAllowingStateLoss()
             return
         }
 
         if (!fragment.isHidden) {
+            Log.i(TAG, "showFragment alreadyShown ${fragment.logName()}")
             return
         }
 
+        Log.i(TAG, "showFragment show ${fragment.logName()}")
         supportFragmentManager.beginTransaction()
             .show(fragment)
-            .commitAllowingStateLoss()
+            .commitNowAllowingStateLoss()
     }
 
     private fun hideFragment(fragment: Fragment) {
@@ -402,9 +408,17 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        Log.i(TAG, "hideFragment hide ${fragment.logName()}")
         supportFragmentManager.beginTransaction()
             .hide(fragment)
-            .commitAllowingStateLoss()
+            .commitNowAllowingStateLoss()
+    }
+
+    fun onVideoRenderingStart(title: String) {
+        Log.i(TAG, "onVideoRenderingStart $title")
+        hideFragment(loadingFragment)
+        hideFragment(errorFragment)
+        showFragment(playerFragment)
     }
 
     fun menuActive() {
@@ -607,3 +621,5 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
     }
 }
+
+private fun Fragment.logName(): String = this::class.java.simpleName

@@ -20,7 +20,6 @@ object SP {
     private const val KEY_LIKE = "like"
     private const val KEY_VERSION = "version"
     private const val KEY_LOG_TIMES = "log_times"
-    private const val KEY_CCTV_QUALITY = "cctv_quality"
 
     const val DEFAULT_CHANNEL_REVERSAL = false
     const val DEFAULT_CHANNEL_NUM = false
@@ -31,7 +30,6 @@ object SP {
     const val DEFAULT_COMPACT_MENU = true
     const val DEFAULT_DISPLAY_SECONDS = true
     const val DEFAULT_LOG_TIMES = 10
-    const val DEFAULT_CCTV_QUALITY = ""
     const val DEFAULT_POSITION_GROUP = 1
     const val DEFAULT_POSITION = 0
     const val DEFAULT_REPEAT_INFO = true
@@ -96,10 +94,6 @@ object SP {
     var displaySeconds: Boolean
         get() = sp.getBoolean(KEY_DISPLAY_SECONDS, DEFAULT_DISPLAY_SECONDS)
         set(value) = sp.edit().putBoolean(KEY_DISPLAY_SECONDS, value).apply()
-
-    var cctvQuality: String
-        get() = sp.getString(KEY_CCTV_QUALITY, DEFAULT_CCTV_QUALITY) ?: DEFAULT_CCTV_QUALITY
-        set(value) = sp.edit().putString(KEY_CCTV_QUALITY, value).apply()
 
     fun getLike(id: Int): Boolean {
         val stringSet = sp.getStringSet(KEY_LIKE, emptySet())

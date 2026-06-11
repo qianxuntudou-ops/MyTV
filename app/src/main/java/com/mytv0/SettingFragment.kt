@@ -209,7 +209,6 @@ class SettingFragment : Fragment() {
         SP.position = SP.DEFAULT_POSITION
         SP.positionGroup = SP.DEFAULT_POSITION_GROUP
         SP.repeatInfo = SP.DEFAULT_REPEAT_INFO
-        SP.cctvQuality = SP.DEFAULT_CCTV_QUALITY
         SP.deleteLike()
 
         viewModel.setDisplaySeconds(SP.DEFAULT_DISPLAY_SECONDS)
